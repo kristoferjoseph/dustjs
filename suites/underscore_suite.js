@@ -8,28 +8,28 @@ var benches = {
   },
 
   replace: {
-    source:  "Hello <%= name %>! You have <%= count %> new messages.",
+    source:  "Hello <%= data.name %>! You have <%= data.count %> new messages.",
     context: { name: "Mick", count: 30 }
   },
 
   array: {
-    source:   "<% _.each(names, function(item) { %> <%= item.name %> <% }); %>",
+    source:   "<% _.each(data.names, function(item) { %> <%= item.name %> <% }); %>",
     context:  { names: [{name: "Moe"}, {name: "Larry"}, {name: "Curly"}, {name: "Shemp"}] }
   },
 
   object: {
-    source:   "<%= person.name %> <%= person.age %>",
+    source:   "<%= data.person.name %> <%= data.person.age %>",
     context:  { person: { name: "Larry", age: 45 } }
   },
 
   partial: {
-    source:   "<% _.each(peeps, function(peep) { %> <%= partials.myPartialTemplate(peep) %> <% }); %>",
+    source:   "<% _.each(data.peeps, function(peep) { %> <%= data.partials.myPartialTemplate(peep) %> <% }); %>",
     context:  { peeps: [{name: "Moe", count: 15}, {name: "Larry", count: 5}, {name: "Curly", count: 1}] },
-    partials: { myPartialTemplate: "Hello <%= name %>! You have <%= count %> new messages." }
+    partials: { myPartialTemplate: "Hello <%= data.name %>! You have <%= data.count %> new messages." }
   },
 
   recursion: {
-    source:   "<%= name %> <% _.each(kids, function(kid) { %> <%= partials.recursion({data:kid, partials:partials}) %> <% }); %>",
+    source:   "<%= data.name %> <% _.each(data.kids, function(kid) { %> <%= data.partials.recursion({data:data.kid, partials:data.partials}) %> <% }); %>",
     context:  {
                 name: '1',
                 kids: [
@@ -45,7 +45,7 @@ var benches = {
   },
 
   filter: {
-    source:   "foo <%= filter(bar) %>",
+    source:   "foo <%= data.filter(data.bar) %>",
     context:  {
                 filter: function(str) {
                   return str.toUpperCase();
@@ -55,9 +55,9 @@ var benches = {
   },
 
   complex: {
-    source:  "<h1><%= header() %></h1>\n" +
-             "<% if(hasItems) { %>" +
-             "  <% _.each(items, function(item) { %>\n" +
+    source:  "<h1><%= data.header() %></h1>\n" +
+             "<% if(data.hasItems) { %>" +
+             "  <% _.each(data.items, function(item) { %>\n" +
              "    <ul>\n" +
              "        <% if(item.current) { %>\n" +
              "          <li><strong> <%- item.name %> </strong></li>\n" +
@@ -88,13 +88,13 @@ var benches = {
 
 exports.underscoreBench = function(suite, name, id) {
   var bench = benches[name],
-      fn = _.template(bench.source),
+      fn = _.template(bench.source, null, {variable:'data'}),
       ctx = bench.context,
       partials = {};
 
   if (bench.partials) {
     for (var key in bench.partials) {
-      partials[key] = _.template(bench.partials[key]);
+      partials[key] = _.template(bench.partials[key], null, {variable:'data'});
     }
   }
 
